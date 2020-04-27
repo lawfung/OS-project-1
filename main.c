@@ -2,6 +2,8 @@
 #include <string.h>
 #include <unistd.h>
 #include "process.h"
+#include <sched.h>
+#include <stdlib.h>
 int main() {
 	char policy[9];
 	scanf("%s", policy);
@@ -14,8 +16,6 @@ int main() {
 		arr[i].id = i;
 		arr[i].pid = -1;
 	}
-	assign_cpu(getpid(), 0);
-	set_high(getpid());
 	if(strcmp(policy, "FIFO") == 0) {
 		
 	}
