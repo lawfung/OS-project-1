@@ -53,14 +53,14 @@ int scheduling(struct process arr[], int n, int type) {
 		}
 		while(kk < n && arr[kk].ready == my_time) {
 			arr[kk].pid = new_pro(arr[kk]);
-			set_low(arr[kk].pid);
+			set_priority(arr[kk].pid, SCHED_IDLE);
 			++ kk;
 		}
 		int s = select();
 		if(s != -1 && now != s) {
-			set_high(arr[s].pid);
+			set_priority(arr[s].pid, SCHED_OTHER);
 			if(now != -1)
-				set_low(arr[now].pid);
+				set_priority(arr[now].SCHED_IDLE);
 			now = s;
 			last_run = s;
 			last_start = my_time;
