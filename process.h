@@ -13,3 +13,4 @@ struct process {
 	pid_t pid;
 	int id;
 };
+int scheduling(struct process arr[], int n, int type);

@@ -4,7 +4,7 @@
 #include "process.h"
 #include <sched.h>
 #include <stdlib.h>
-int main() {
+int main(int argc, char *argv[]) {
 	char policy[9];
 	scanf("%s", policy);
 	int n;
@@ -16,18 +16,14 @@ int main() {
 		arr[i].id = i;
 		arr[i].pid = -1;
 	}
-	if(strcmp(policy, "FIFO") == 0) {
-		
-	}
-	else if(strcmp(policy, "RR") == 0) {
-		
-	}
-	else if(strcmp(policy, "SJF") == 0) {
-		
-	}
-	else if(strcmp(policy, "PSJF") == 0) {
-		
-	}
+	if(strcmp(policy, "FIFO") == 0)
+		scheduling(arr, n, 0);
+	else if(strcmp(policy, "RR") == 0)
+		scheduling(arr, n, 1);
+	else if(strcmp(policy, "SJF") == 0)
+		scheduling(arr, n, 2);
+	else if(strcmp(policy, "PSJF") == 0)
+		scheduling(arr, n, 3);
 	else {
 		fprintf(stderr, "policy fault\n");
 	}

@@ -3,7 +3,9 @@
 #include <sys/wait.h>
 #include <sched.h>
 #include <stdlib.h>
+#include <errno.h>
 void assign_cpu(int pid, int co) {
+	fprintf(stderr, "cup : %d %d\n", pid, co);
 	cpu_set_t mask;
 	CPU_ZERO(&mask);
 	CPU_SET(co, &mask);
@@ -14,8 +16,9 @@ void assign_cpu(int pid, int co) {
 void set_priority(int pid, int poli){
 	struct sched_param pa;
 	pa.sched_priority = 0;
-	if(sched_setscheduler(pid, poli, &pa) < 0)
-		fprintf(stderr, "set error");
+	int rt = sched_setscheduler(pid, poli, &pa);
+	if(rt < 0)
+		fprintf(stderr, "set error %d %d error=%d poli=%d %d\n", rt, pid, errno,poli, SCHED_OTHER);
 	return;
 }
 int new_pro(struct process pro) {
@@ -70,12 +73,14 @@ int select_run(struct process arr[], int now,int last_run, int last_start, int m
 	return -1;
 }
 int scheduling(struct process arr[], int n, int type) {
+	fprintf(stderr, "check 1\n");
 	assign_cpu(getpid(), 0);
 	set_priority(getpid(), SCHED_OTHER);
 	qsort(arr, n, sizeof(struct process), cmp);
 	int kk = 0;
 	int now = -1, last_start = -1, done = 0, last_run = -1;
-	for(int my_time = 0; ; ++ my_time) {
+	int my_time;
+	for(my_time = 0; ; ++ my_time) {
 		if(now != -1) {
 			int wpid = waitpid(arr[now].pid, 0, WNOHANG);
 			if(wpid > 0) {
@@ -106,4 +111,5 @@ int scheduling(struct process arr[], int n, int type) {
 		if(now != -1)
 			-- arr[now].exe;
 	}
+	fprintf(stderr, "my_time=%d\n", my_time);
 }
