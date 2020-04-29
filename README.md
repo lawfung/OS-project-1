@@ -25,13 +25,13 @@
 ### select run
 
 - **FIFO** : 在一開始就按照ready time來排序，因此直接選擇下一個尚未執行完的程序即可。
-- **RR** : 當執行過time quantum，從上一次執行過的process id開始依序找，直到找到一個尚未結束的process。
+- **RR** : 維護一個queue，每次都執行queue最前端的process，執行結束之後就將之pop掉。當執行過time quantum的倍數後，將之pop掉改放在最後面。新進的process也放在最後面。**如果同時有跑超過time quantum的process與新進的process，新進的process放在前面。**
 - **SJF** : 如果已經有正在執行的程序，繼續執行它，如果沒有的話，O(n)找尋時間最小的程序。
 - **PSJF** : O(n)找尋剩餘時間最小的程序。
 
 ### 其他函數實作細節
 
-- **set_priority** : 使用**sched_setscheduler**，如果要設為高優先度，用參數**SCHED_OTHER**。如果要設為高優先度，用參數**SCHED_IDLE**。
+- **set_priority** : 使用**sched_setscheduler**，如果要設為高優先度，用參數**SCHED_OTHER**，並將nice值調為-19。如果要設為低優先度，用參數**SCHED_IDLE**。
 - **assin_cpu** : 使用**sched_setaffinity**函數實作。
 - **syscall(334, ...)** : 取得時間的syscall，使用**getnstimeofday**實作。
 - **syscall(335, ...)** : 輸出到dmesg的**syscall**，使用**printk**實作。
