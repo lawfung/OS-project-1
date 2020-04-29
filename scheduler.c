@@ -20,7 +20,7 @@ void assign_cpu(int pid, int co) {
 	return;
 }
 void set_priority(int pid, int pri){
-	fprintf(stderr, "pid=%d pri=%d %d\n", pid, pri, SCHED_OTHER);
+	//fprintf(stderr, "pid=%d pri=%d %d\n", pid, pri, SCHED_OTHER);
 	int rt;
 	if(pri == 99){
 		struct sched_param pa;
@@ -110,9 +110,9 @@ int scheduling(struct process arr[], int n, int type) {
 	int now = -1, last_start = -1, done = 0, last_run = -1;
 	int my_time;
 	for(my_time = 0; ; ++ my_time) {
-		if(my_time % 500 == 201) 	fprintf(stderr, "%d now=%d left=%d\n", my_time, now, arr[now].exe);
+		//if(my_time % 500 == 201) 	fprintf(stderr, "%d now=%d left=%d\n", my_time, now, arr[now].exe);
 		if(now != -1 && arr[now].exe == 0) {
-			fprintf(stderr, "check 1 now=%d\n", now);
+			//fprintf(stderr, "check 1 now=%d\n", now);
 			int wpid = waitpid(arr[now].pid, 0, 0);
 			if(wpid > 0) {
 				++qu.l;
