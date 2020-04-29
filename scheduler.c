@@ -13,13 +13,21 @@ void assign_cpu(int pid, int co) {
 		fprintf(stderr, "sched error\n");
 	return;
 }
-void set_priority(int pid, int poli){
-	fprintf(stderr, "pid=%d poli=%d %d\n", pid, poli, SCHED_OTHER);
-	struct sched_param pa;
-	pa.sched_priority = 0;
-	int rt = sched_setscheduler(pid, poli, &pa);
+void set_priority(int pid, int pri){
+	//fprintf(stderr, "pid=%d poli=%d %d\n", pid, poli, SCHED_OTHER);
+	int rt;
+	if(pri == 99){
+		struct sched_param pa;
+		pa.sched_priority = 0;
+		rt = sched_setscheduler(pid, SCHED_OTHER, &pa);
+	}
+	else{
+		struct sched_param pa;
+		pa.sched_priority = 0;
+		rt = sched_setscheduler(pid, SCHED_IDLE, &pa);
+	}
 	if(rt < 0)
-		fprintf(stderr, "set error rt=%d pid=%d error=%d poli=%d %d\n", rt, pid, errno,poli, SCHED_OTHER);
+		fprintf(stderr, "set error rt=%d pid=%d error=%d pri=%d\n", rt, pid, errno,pri);
 	return;
 }
 int new_pro(struct process pro) {
@@ -28,12 +36,21 @@ int new_pro(struct process pro) {
 		fprintf(stderr, "fork error");
 	if(pid == 0) {
 		assign_cpu(getpid(), 1);
+		//set_priority(getpid(), 1);
 		unsigned long s_sec, s_nsec, e_sec, e_nsec ;
 		syscall(334, &s_sec, &s_nsec);
-		for(int i = 0; i < pro.exe; ++ i)	run_unit_time();
+		for(int i = 0; i < pro.exe; ++ i){
+			run_unit_time();
+			//if(i % 100 == 0)
+				//fprintf(stderr, "check 2 id=%d\n",getpid()) ;
+		}
 		syscall(334, &e_sec, &e_nsec);
 		syscall(335,getpid(),  s_sec, s_nsec, e_sec, e_nsec);
 		exit(0);
+	}
+	else {
+		//assign_cpu(pid, 1);
+		set_priority(pid, 1);
 	}
 	return pid;
 }
@@ -74,19 +91,20 @@ int select_run(struct process arr[], int now,int last_run, int last_start, int m
 	return -1;
 }
 int scheduling(struct process arr[], int n, int type) {
-	//fprintf(stderr, "check 1\n");
 	assign_cpu(getpid(), 0);
-	set_priority(getpid(), SCHED_OTHER);
+	set_priority(getpid(), 99);
 	qsort(arr, n, sizeof(struct process), cmp);
 	int kk = 0;
 	int now = -1, last_start = -1, done = 0, last_run = -1;
 	int my_time;
 	for(my_time = 0; ; ++ my_time) {
 		if(now != -1 && arr[now].exe == 0) {
+//			fprintf(stderr, "check 1 now=%d\n", now);
 			int wpid = waitpid(arr[now].pid, 0, 0);
 			if(wpid > 0) {
 				printf("%s %d\n", arr[now].name, arr[now].pid);
-				fprintf(stderr, "%d\n", my_time);
+				fflush(stdout);
+				//fprintf(stderr, "%d\n", my_time);
 				arr[now].pid = -2;
 				now = -1;
 				++ done;
@@ -97,14 +115,13 @@ int scheduling(struct process arr[], int n, int type) {
 		}
 		while(kk < n && arr[kk].ready == my_time) {
 			arr[kk].pid = new_pro(arr[kk]);
-			set_priority(arr[kk].pid, SCHED_IDLE);
 			++ kk;
 		}
 		int s = select_run(arr, now, last_run, last_start, my_time, type, n, done);
 		if(s != -1 && now != s) {
-			set_priority(arr[s].pid, SCHED_OTHER);
+			set_priority(arr[s].pid, 99);
 			if(now != -1)
-				set_priority(arr[now].pid, SCHED_IDLE);
+				set_priority(arr[now].pid, 1);
 			now = s;
 			last_start = my_time;
 		}
@@ -113,5 +130,5 @@ int scheduling(struct process arr[], int n, int type) {
 		if(now != -1)
 			-- arr[now].exe;
 	}
-	fprintf(stderr, "my_time=%d\n", my_time);
+	//fprintf(stderr, "my_time=%d\n", my_time);
 }
