@@ -41,11 +41,11 @@ int new_pro(struct process pro) {
 	int pid = fork();
 	if(pid < 0)
 		fprintf(stderr, "fork error");
+	unsigned long s_sec, s_nsec, e_sec, e_nsec ;
+	syscall(334, &s_sec, &s_nsec);
 	if(pid == 0) {
 		assign_cpu(getpid(), 1);
 		//set_priority(getpid(), 1);
-		unsigned long s_sec, s_nsec, e_sec, e_nsec ;
-		syscall(334, &s_sec, &s_nsec);
 		for(int i = 0; i < pro.exe; ++ i){
 			run_unit_time();
 			//if(i % 100 == 0)
